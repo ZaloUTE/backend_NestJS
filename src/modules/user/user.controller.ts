@@ -4,6 +4,7 @@ import { AppError } from "src/common/errors/app.error";
 import { GetPostsQueryDto } from "src/dto/request/getPost.request.dto";
 import { CreateUserRequestDto } from "src/dto/request/create-user.request.dto";
 import { UpdateUserRequestDto } from "src/dto/request/update-user.request.dto";
+import { GetUsersQueryDto } from "src/dto/request/get-users.request.dto";
 import { UserResponseDto } from "src/dto/response/user.response.dto";
 import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
 
@@ -20,6 +21,7 @@ export class UserController {
      }
 
      @Get("/detail")
+     @UseGuards(JwtAuthGuard)
      async getAllPost(
           @Req() req: Request,
           @Query(
@@ -50,6 +52,32 @@ export class UserController {
      }
 
      // ========== USER MANAGEMENT ENDPOINTS ==========
+
+     @Get('/users')
+     @UseGuards(JwtAuthGuard)
+     async getAllUsers(
+          @Query(
+               new ValidationPipe({
+                    transform: true,
+                    whitelist: true,
+                    forbidNonWhitelisted: true,
+                    stopAtFirstError: true,
+                    exceptionFactory: (errors) => {
+                         const messages = errors
+                              .map(err => Object.values(err.constraints || {}).join(', '))
+                              .join('; ');
+                         throw new AppError({
+                              statusCode: 400,
+                              code: 'INVALID_QUERY',
+                              message: messages || 'Dữ liệu không hợp lệ',
+                         });
+                    },
+               }),
+          )
+          query: GetUsersQueryDto,
+     ) {
+          return await this.userService.getAllUsers(query);
+     }
 
      @Post('/users')
      @UseGuards(JwtAuthGuard)
@@ -83,6 +111,12 @@ export class UserController {
      async getUserById(@Param('id') id: string) {
           const user = await this.userService.getUserById(id);
           return new UserResponseDto(user);
+     }
+
+     @Get('/users/:id/stats')
+     @UseGuards(JwtAuthGuard)
+     async getUserDetailedStats(@Param('id') id: string) {
+          return await this.userService.getUserDetailedStats(id);
      }
 
      @Put('/users/:id')
