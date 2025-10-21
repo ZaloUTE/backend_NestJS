@@ -55,4 +55,4 @@ import { Friendship, FriendshipSchema } from '../module/friendship.schema';
   ],
   exports: [MongooseModule],
 })
-export class DatabaseModule {}
+export class DatabaseModule { }

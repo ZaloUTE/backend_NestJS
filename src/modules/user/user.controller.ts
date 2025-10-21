@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Query, Req, Body, Param, ValidationPipe, UseGuards  } from "@nestjs/common";
+import { Controller, Get, Post, Put, Delete, Query, Req, Body, Param, ValidationPipe, UseGuards } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { AppError } from "src/common/errors/app.error";
 import { GetPostsQueryDto } from "src/dto/request/getPost.request.dto";
@@ -52,6 +52,7 @@ export class UserController {
      // ========== USER MANAGEMENT ENDPOINTS ==========
 
      @Post('/users')
+     @UseGuards(JwtAuthGuard)
      async createUser(
           @Body(
                new ValidationPipe({
@@ -78,12 +79,14 @@ export class UserController {
      }
 
      @Get('/users/:id')
+     @UseGuards(JwtAuthGuard)
      async getUserById(@Param('id') id: string) {
           const user = await this.userService.getUserById(id);
           return new UserResponseDto(user);
      }
 
      @Put('/users/:id')
+     @UseGuards(JwtAuthGuard)
      async updateUser(
           @Param('id') id: string,
           @Body(
@@ -111,6 +114,7 @@ export class UserController {
      }
 
      @Delete('/users/:id')
+     @UseGuards(JwtAuthGuard)
      async deleteUser(@Param('id') id: string) {
           await this.userService.deleteUser(id);
           return { message: 'Xóa user thành công' };

@@ -254,7 +254,7 @@ export class UserService {
 
         // Kiểm tra email đã tồn tại (nếu có thay đổi email)
         if (updateUserDto.email && updateUserDto.email !== user.email) {
-            const existingEmail = await this.userModel.findOne({ 
+            const existingEmail = await this.userModel.findOne({
                 email: updateUserDto.email,
                 _id: { $ne: id }
             });
@@ -269,7 +269,7 @@ export class UserService {
 
         // Kiểm tra MSSV đã tồn tại (nếu có thay đổi MSSV)
         if (updateUserDto.mssv && updateUserDto.mssv !== user.mssv) {
-            const existingMssv = await this.userModel.findOne({ 
+            const existingMssv = await this.userModel.findOne({
                 mssv: updateUserDto.mssv,
                 _id: { $ne: id }
             });
