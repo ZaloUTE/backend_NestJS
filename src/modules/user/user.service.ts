@@ -10,6 +10,9 @@ import { InjectModel } from "@nestjs/mongoose";
 import mongoose from "mongoose";
 import { buildCommentTree } from "src/utils/build-comment-tree";
 import { PostResponse } from "src/dto/response/post.response.dto";
+import { CreateUserRequestDto } from "src/dto/request/create-user.request.dto";
+import { UpdateUserRequestDto } from "src/dto/request/update-user.request.dto";
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -186,6 +189,133 @@ export class UserService {
             listpost: listPostResult,
         }
 
+    }
+
+    // ========== USER MANAGEMENT METHODS ==========
+
+    async createUser(createUserDto: CreateUserRequestDto) {
+        // Kiểm tra email đã tồn tại
+        const existingEmail = await this.userModel.findOne({ email: createUserDto.email });
+        if (existingEmail) {
+            throw new AppError({
+                statusCode: 400,
+                code: 'EMAIL_EXISTS',
+                message: 'Email đã được sử dụng',
+            });
+        }
+
+        // Kiểm tra MSSV đã tồn tại
+        const existingMssv = await this.userModel.findOne({ mssv: createUserDto.mssv });
+        if (existingMssv) {
+            throw new AppError({
+                statusCode: 400,
+                code: 'MSSV_EXISTS',
+                message: 'MSSV đã được sử dụng',
+            });
+        }
+
+        // Hash password
+        const saltRounds = 10;
+        const hashedPassword = await bcrypt.hash(createUserDto.password, saltRounds);
+
+        // Tạo user mới
+        const newUser = new this.userModel({
+            ...createUserDto,
+            password: hashedPassword,
+            role: createUserDto.role || 'user',
+        });
+
+        const savedUser = await newUser.save();
+        return savedUser;
+    }
+
+    async getUserById(id: string) {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new AppError(ERROR.INVALID_ID);
+        }
+
+        const user = await this.userModel.findById(id);
+        if (!user) {
+            throw new AppError(ERROR.USER_NOT_FOUND);
+        }
+
+        return user;
+    }
+
+    async updateUser(id: string, updateUserDto: UpdateUserRequestDto) {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new AppError(ERROR.INVALID_ID);
+        }
+
+        const user = await this.userModel.findById(id);
+        if (!user) {
+            throw new AppError(ERROR.USER_NOT_FOUND);
+        }
+
+        // Kiểm tra email đã tồn tại (nếu có thay đổi email)
+        if (updateUserDto.email && updateUserDto.email !== user.email) {
+            const existingEmail = await this.userModel.findOne({ 
+                email: updateUserDto.email,
+                _id: { $ne: id }
+            });
+            if (existingEmail) {
+                throw new AppError({
+                    statusCode: 400,
+                    code: 'EMAIL_EXISTS',
+                    message: 'Email đã được sử dụng',
+                });
+            }
+        }
+
+        // Kiểm tra MSSV đã tồn tại (nếu có thay đổi MSSV)
+        if (updateUserDto.mssv && updateUserDto.mssv !== user.mssv) {
+            const existingMssv = await this.userModel.findOne({ 
+                mssv: updateUserDto.mssv,
+                _id: { $ne: id }
+            });
+            if (existingMssv) {
+                throw new AppError({
+                    statusCode: 400,
+                    code: 'MSSV_EXISTS',
+                    message: 'MSSV đã được sử dụng',
+                });
+            }
+        }
+
+        // Hash password mới nếu có
+        if (updateUserDto.password) {
+            const saltRounds = 10;
+            updateUserDto.password = await bcrypt.hash(updateUserDto.password, saltRounds);
+        }
+
+        const updatedUser = await this.userModel.findByIdAndUpdate(
+            id,
+            updateUserDto,
+            { new: true, runValidators: true }
+        );
+
+        return updatedUser;
+    }
+
+    async deleteUser(id: string) {
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            throw new AppError(ERROR.INVALID_ID);
+        }
+
+        const user = await this.userModel.findById(id);
+        if (!user) {
+            throw new AppError(ERROR.USER_NOT_FOUND);
+        }
+
+        // Xóa user và các dữ liệu liên quan
+        await Promise.all([
+            this.userModel.findByIdAndDelete(id),
+            this.postModel.updateMany({ userId: id }, { deleted: true, deletedAt: new Date() }),
+            this.likeModel.updateMany({ userId: id }, { deleted: true, deletedAt: new Date() }),
+            this.commentModel.updateMany({ userId: id }, { deleted: true, deletedAt: new Date() }),
+        ]);
+
+        return { message: 'Xóa user thành công' };
     }
 
 }
