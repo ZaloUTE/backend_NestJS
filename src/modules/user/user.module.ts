@@ -6,7 +6,8 @@ import { DatabaseModule } from "src/database/database.module";
 @Module({
     imports: [DatabaseModule],
     controllers: [UserController],
-    providers: [UserService]
+    providers: [UserService],
+    exports: [UserService],
 })
 export class UserModule {};
 // Để sử dụng được cái user module này chúng ta phải import nó vào app nodule

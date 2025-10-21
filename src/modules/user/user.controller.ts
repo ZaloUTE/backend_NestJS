@@ -1,10 +1,12 @@
-import { Controller, Get, Post, Put, Delete, Query, Req, Body, Param, ValidationPipe  } from "@nestjs/common";
+import { Controller, Get, Post, Put, Delete, Query, Req, Body, Param, ValidationPipe, UseGuards  } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { AppError } from "src/common/errors/app.error";
 import { GetPostsQueryDto } from "src/dto/request/getPost.request.dto";
 import { CreateUserRequestDto } from "src/dto/request/create-user.request.dto";
 import { UpdateUserRequestDto } from "src/dto/request/update-user.request.dto";
 import { UserResponseDto } from "src/dto/response/user.response.dto";
+import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
+
 
 
 @Controller('admins')
@@ -12,6 +14,7 @@ export class UserController {
      constructor(private readonly userService: UserService) { };
 
      @Get('/home')
+     @UseGuards(JwtAuthGuard)
      getAdminHome() {
           return this.userService.getAdminHome();
      }

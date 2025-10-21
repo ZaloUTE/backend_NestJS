@@ -18,6 +18,8 @@ export class HttpExceptionFilter implements ExceptionFilter {  // class này b�
     let message = 'Lỗi không xác định';
     let code: string | undefined = undefined;
 
+    console.error('🔥 ERROR:', exception);
+
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const res = exception.getResponse();

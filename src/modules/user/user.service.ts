@@ -48,9 +48,10 @@ export class UserService {
         return results;
     };
 
-    async ensureUserExists(userId: string) {
+    async ensureUserExists(userId: string): Promise<User> {
         const user = await this.userModel.findById(userId);
         if (!user) throw new AppError(ERROR.USER_NOT_FOUND);
+        return user;
     }
 
     async getAllPost(page: number, limit: number, userId: string) {

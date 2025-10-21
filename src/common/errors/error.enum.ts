@@ -34,4 +34,9 @@ export const ERROR = {
     statusCode: 500,
     code: 'INTERNAL_ERROR',
   },
+  UNAUTHORIZED: {
+    message: 'Lỗi quyền truy cập',
+    statusCode: 401,
+    code: 'UNAUTHORIZED',
+  }
 } as const;
