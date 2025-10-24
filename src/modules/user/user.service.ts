@@ -252,7 +252,6 @@ export class UserService {
         if (!user) {
             throw new AppError(ERROR.USER_NOT_FOUND);
         }
-
         // Kiểm tra email đã tồn tại (nếu có thay đổi email)
         if (updateUserDto.email && updateUserDto.email !== user.email) {
             const existingEmail = await this.userModel.findOne({
@@ -327,7 +326,7 @@ export class UserService {
 
         // Build query conditions
         const conditions: any = {};
-        
+
         if (search) {
             conditions.$or = [
                 { name: { $regex: search, $options: 'i' } },
@@ -357,16 +356,16 @@ export class UserService {
                 const [totalPosts, totalLikes, totalComments, totalShares, recentPosts] = await Promise.all([
                     // Total posts by user
                     this.postModel.countDocuments({ userId: user._id, deleted: false }),
-                    
+
                     // Total likes given by user
                     this.likeModel.countDocuments({ userId: user._id, deleted: false }),
-                    
+
                     // Total comments by user
                     this.commentModel.countDocuments({ userId: user._id, deleted: false }),
-                    
+
                     // Total shares by user
                     this.postModel.countDocuments({ userId: user._id, originalPostId: { $ne: null }, deleted: false }),
-                    
+
                     // Recent posts (last 3)
                     this.postModel
                         .find({ userId: user._id, deleted: false })
@@ -457,7 +456,7 @@ export class UserService {
             this.likeModel.countDocuments({ userId: user._id, deleted: false }),
             this.commentModel.countDocuments({ userId: user._id, deleted: false }),
             this.postModel.countDocuments({ userId: user._id, originalPostId: { $ne: null }, deleted: false }),
-            
+
             // Posts liked by others (popularity)
             this.likeModel.aggregate([
                 { $match: { deleted: false } },
@@ -466,42 +465,46 @@ export class UserService {
                 { $match: { 'post.userId': user._id, 'post.deleted': false } },
                 { $count: 'totalLikesReceived' }
             ]),
-            
+
             // Recent posts (last 5)
             this.postModel
                 .find({ userId: user._id, deleted: false })
                 .select('content createdAt likeCount commentCount shareCount')
                 .sort({ createdAt: -1 })
                 .limit(5),
-            
+
             // Top posts by engagement
             this.postModel.aggregate([
                 { $match: { userId: user._id, deleted: false } },
                 { $lookup: { from: 'likes', localField: '_id', foreignField: 'postId', as: 'likes' } },
                 { $lookup: { from: 'comments', localField: '_id', foreignField: 'postId', as: 'comments' } },
-                { $addFields: { 
-                    totalEngagement: { 
-                        $add: [
-                            { $size: '$likes' },
-                            { $size: '$comments' }
-                        ]
+                {
+                    $addFields: {
+                        totalEngagement: {
+                            $add: [
+                                { $size: '$likes' },
+                                { $size: '$comments' }
+                            ]
+                        }
                     }
-                }},
+                },
                 { $sort: { totalEngagement: -1 } },
                 { $limit: 3 },
                 { $project: { content: 1, createdAt: 1, totalEngagement: 1 } }
             ]),
-            
+
             // Monthly activity (last 6 months)
             this.postModel.aggregate([
                 { $match: { userId: user._id, deleted: false } },
-                { $group: {
-                    _id: {
-                        year: { $year: '$createdAt' },
-                        month: { $month: '$createdAt' }
-                    },
-                    posts: { $sum: 1 }
-                }},
+                {
+                    $group: {
+                        _id: {
+                            year: { $year: '$createdAt' },
+                            month: { $month: '$createdAt' }
+                        },
+                        posts: { $sum: 1 }
+                    }
+                },
                 { $sort: { '_id.year': -1, '_id.month': -1 } },
                 { $limit: 6 }
             ])

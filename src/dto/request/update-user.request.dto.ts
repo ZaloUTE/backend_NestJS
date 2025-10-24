@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsDateString, IsOptional, IsEnum, MinLength, MaxLength, Matches } from 'class-validator';
+import { IsString, IsEmail, IsDate, IsOptional, IsEnum, MinLength, MaxLength, Matches } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class UpdateUserRequestDto {
@@ -23,12 +23,12 @@ export class UpdateUserRequestDto {
   password?: string;
 
   @IsOptional()
-  @IsDateString({}, { message: 'Ngày sinh không hợp lệ' })
+  @IsDate({ message: 'Ngày sinh không hợp lệ' })
   @Type(() => Date)
   dateOfBirth?: Date;
 
   @IsOptional()
-  @IsEnum(['nam', 'nữ', 'khác'], { message: 'Giới tính phải là nam, nữ hoặc khác' })
+  @IsEnum(['nam', 'nữ', 'khác'], { message: 'Giới tính phải là nam, nữ hoặc khác' })
   gender?: string;
 
   @IsOptional()

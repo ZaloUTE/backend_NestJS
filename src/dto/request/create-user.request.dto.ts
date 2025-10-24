@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsDateString, IsOptional, IsEnum, MinLength, MaxLength, Matches } from 'class-validator';
+import { IsString, IsEmail, IsDate, IsOptional, IsEnum, MinLength, MaxLength, Matches } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateUserRequestDto {
@@ -18,7 +18,7 @@ export class CreateUserRequestDto {
   @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
   password!: string;
 
-  @IsDateString({}, { message: 'Ngày sinh không hợp lệ' })
+  @IsDate({ message: 'Ngày sinh không hợp lệ' })
   @Type(() => Date)
   dateOfBirth!: Date;
 
