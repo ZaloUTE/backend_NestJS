@@ -10,7 +10,7 @@ export class User extends Document {
     type: Date,
     validate: {
       validator: (value: Date) => {
-        if (!value) return false;
+        if (!value) return true; // cho phép bỏ trống
         const today = new Date();
         let age = today.getFullYear() - value.getFullYear();
         const m = today.getMonth() - value.getMonth();
@@ -19,10 +19,14 @@ export class User extends Document {
         }
         return age >= 18 && age <= 100;
       },
-      message: (props: any) => `Tuổi phải từ 18 đến 100! (${props.value.toDateString()})`,
+      message: (props: any) =>
+        props.value
+          ? `Tuổi phải từ 18 đến 100! (${props.value.toDateString()})`
+          : 'Ngày sinh không hợp lệ!',
     },
   })
   dateOfBirth: Date;
+
 
   @Prop({ required: true, unique: true })
   email: string;

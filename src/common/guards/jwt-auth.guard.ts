@@ -5,9 +5,9 @@ import { ERROR } from '../errors/error.enum';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
-    handleRequest(err: any, user: any) {
+  handleRequest(err: any, user: any) {
     if (err || !user) {
-      // ✅ Dùng AppError custom
+      console.log('❌ JWT Auth Error:', err?.message);
       throw new AppError(ERROR.UNAUTHORIZED);
     }
     return user;

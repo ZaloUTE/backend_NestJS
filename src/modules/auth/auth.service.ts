@@ -9,19 +9,19 @@ export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UserService,
-  ) {}
+  ) { }
 
   async generateToken(userId: string) {
     const user = await this.userService.ensureUserExists(userId);
-    if (!user){
-        throw new AppError(ERROR.USER_NOT_FOUND);
+    if (!user) {
+      throw new AppError(ERROR.USER_NOT_FOUND);
     }
     const payload = { user: user };
     const token = this.jwtService.sign(payload);
-    return { access_token: token };
+      return { access_token: token };
   }
 
   async validateUser(payload: any) {
-    return this.userService.ensureUserExists(payload.userId);
+    return this.userService.ensureUserExists(payload.user._id);
   }
 }
