@@ -19,6 +19,16 @@ export const ERROR = {
     statusCode: 403,
     code: 'USER_BLOCKED',
   },
+  EMAIL_EXISTS: {
+    message: 'Email đã được sử dụng',
+    statusCode: 400,
+    code: 'EMAIL_EXISTS',
+  },
+  MSSV_EXISTS: {
+    message: 'MSSV đã được sử dụng',
+    statusCode: 400,
+    code: 'MSSV_EXISTS',
+  },
   INTERNAL_ERROR: {
     message: 'Lỗi không xác định',
     statusCode: 500,
