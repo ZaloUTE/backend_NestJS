@@ -1,8 +1,16 @@
-<<<<<<< HEAD
-import { Controller, Get, Query, UseGuards } from "@nestjs/common";
-=======
-import { Controller, Get, Post, Put, Delete, Query, Req, Body, Param, ValidationPipe, UseGuards } from "@nestjs/common";
->>>>>>> 7b634c62a9055ceb71d12b0eaa1942efdc33dd76
+import {
+     Controller,
+     Get,
+     Post,
+     Put,
+     Delete,
+     Query,
+     Req,
+     Param,
+     Body,
+     ValidationPipe,
+     UseGuards
+} from "@nestjs/common";
 import { UserService } from "./user.service";
 import { GetPostsQueryDto } from "src/dto/request/getPost.request.dto";
 import { CreateUserRequestDto } from "src/dto/request/create-user.request.dto";
@@ -10,6 +18,7 @@ import { UpdateUserRequestDto } from "src/dto/request/update-user.request.dto";
 import { GetUsersQueryDto } from "src/dto/request/get-users.request.dto";
 import { UserResponseDto } from "src/dto/response/user.response.dto";
 import { JwtAuthGuard } from "src/common/guards/jwt-auth.guard";
+import { AppError } from "src/common/errors/app.error";
 
 
 
@@ -25,39 +34,11 @@ export class UserController {
 
      @UseGuards(JwtAuthGuard)
      @Get("/detail")
-<<<<<<< HEAD
-     async getAllPost( @Query() query: GetPostsQueryDto ) { // chỉ có query ở đây thì nó sẽ tự động check data
-=======
-     @UseGuards(JwtAuthGuard)
-     async getAllPost(
-          @Req() req: Request,
-          @Query(
-               new ValidationPipe({
-                    transform: true,
-                    whitelist: true,
-                    forbidNonWhitelisted: true,
-                    stopAtFirstError: true,
-                    exceptionFactory: (errors) => {
-                         // gom message từ class-validator
-                         const messages = errors
-                              .map(err => Object.values(err.constraints || {}).join(', '))
-                              .join('; ');
-
-                         // throw AppError
-                         throw new AppError({
-                              statusCode: 400,
-                              code: 'INVALID_QUERY',
-                              message: messages || 'Dữ liệu không hợp lệ',
-                         });
-                    },
-               }),
-          )
-          query: GetPostsQueryDto,
-     ) {
->>>>>>> 7b634c62a9055ceb71d12b0eaa1942efdc33dd76
+     async getAllPost(@Query() query: GetPostsQueryDto) {
           const { page, limit, userId } = query;
           return await this.userService.getAllPost(page, limit, userId);
      }
+
 
      // ========== USER MANAGEMENT ENDPOINTS ==========
 
