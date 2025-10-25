@@ -10,6 +10,8 @@ import { InjectModel } from "@nestjs/mongoose";
 import mongoose from "mongoose";
 import { buildCommentTree } from "src/utils/build-comment-tree";
 import { PostResponse } from "src/dto/response/post.response.dto";
+import { UserViewResponse } from "src/dto/response/userView.response.dto";
+import { AllPostResponse } from "src/dto/response/allPost.response";
 
 @Injectable()
 export class UserService {
@@ -19,7 +21,7 @@ export class UserService {
         @InjectModel(Like.name) private readonly likeModel: Model<Like>,
         @InjectModel(Comment.name) private readonly commentModel: Model<Comment>,
     ) { }
-    async getAdminHome() {
+    async getAdminHome(): Promise<UserViewResponse[]>  {
         const listUser = await this.userModel.find();
 
         const results = await Promise.all(
@@ -31,14 +33,7 @@ export class UserService {
                     this.postModel.countDocuments({ userId: user._id, originalPostId: { $ne: null } }),
                 ]);
 
-                return {
-                    id: user._id,
-                    name: user.name,
-                    totalPosts,
-                    totalLikes,
-                    totalComments,
-                    totalShares
-                };
+                return new UserViewResponse (user._id as string, user.name, totalPosts, totalLikes, totalComments, totalShares);
             })
         );
 
@@ -51,7 +46,7 @@ export class UserService {
         return user;
     }
 
-    async getAllPost(page: number, limit: number, userId: string) {
+    async getAllPost(page: number, limit: number, userId: string): Promise<AllPostResponse> {
         await this.ensureUserExists(userId);
         const skip = (page - 1) * limit;
         const query: any = { deleted: false, userId: new mongoose.Types.ObjectId(userId) };
@@ -181,10 +176,7 @@ export class UserService {
 
         const listPostResult = resultWithTree.map(item => new PostResponse(item));
 
-        return {
-            total,
-            listpost: listPostResult,
-        }
+        return new AllPostResponse (total, listPostResult);
 
     }
 

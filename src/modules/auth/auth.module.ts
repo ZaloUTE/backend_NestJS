@@ -9,10 +9,11 @@ import { AuthController } from './auth.controller';
 
 @Module({
   imports: [
-    // Nếu AppModule đã có ConfigModule.forRoot({ isGlobal: true }) thì không cần thêm lại
-    PassportModule.register({ defaultStrategy: 'jwt' }),
+    // Đăng ký module passport để NestJS biết bạn đang dùng Passport cho authentication.
+    PassportModule.register({ defaultStrategy: 'jwt' }), // Strategy này đã được khai báo trong jwtService à
+    // hàm register nhận vào tham số cấu hình, rồi tự tạo ra providers tương ứng.
 
-    JwtModule.registerAsync({
+    JwtModule.registerAsync({  // khai báo JWT Module để có thể dùng JWT service trong authService (sign đồ á)
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('JWT_SECRET'),

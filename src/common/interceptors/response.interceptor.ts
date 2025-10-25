@@ -12,10 +12,10 @@ export class ResponseInterceptor<T> implements NestInterceptor<T, any> {  // Int
   // Request → Guard → Interceptor (trước) → Controller → Interceptor (sau) → Response
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(  //next.handle.pipe.map là lấy data từ cái thằng controller đó
-      map((data) => ({ 
+      map((data) => ({  // data này lấy từ thằng controller
         statusCode: HttpStatus.SUCCESS,
         message: HttpMessage.SUCCESS,
-        data, // data này nhận lại từ controller
+        data, // data này nhận lại từ controller, có thể là cái lớp DTO
       })),
     );
   }

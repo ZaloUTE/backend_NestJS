@@ -22,6 +22,6 @@ export class AuthService {
   }
 
   async validateUser(payload: any) {
-    return this.userService.ensureUserExists(payload.userId);
+    return this.userService.ensureUserExists(payload.user._id);
   }
 }
